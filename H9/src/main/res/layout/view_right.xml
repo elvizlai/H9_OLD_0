@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<com.sdrzlyz.h9.view.RefreshableView
+    android:id="@+id/wf_refreshable_view"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background"
+    android:orientation="vertical">
+
+    <ListView
+        android:id="@+id/wfList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</com.sdrzlyz.h9.view.RefreshableView>

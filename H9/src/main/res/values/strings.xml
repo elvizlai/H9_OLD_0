@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">H9</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="account_hint">用户名</string>
+    <string name="password_hint">密码</string>
+    <string name="rem_password">记住密码</string>
+    <string name="auto_login">自动登录</string>
+    <string name="login_btn">登 录</string>
+    <string name="copy_right">华盖软件 版权所有</string>
+    <string name="cancle_btn">取 消</string>
+    <string name="net_setting_done">完 成</string>
+    <string name="serviceUrl_hint">请输入服务器地址</string>
+    <string name="network_set_done_toast">网络配置成功</string>
+    <string name="acc_is_empty_toast">用户名不能为空，请输入用户名</string>
+    <string name="psw_is_empty_toast">密码不能为空，请输入密码</string>
+    <string name="login_success_toast">登录成功</string>
+    <string name="login_failed_toast">用户名或密码错误</string>
+    <string name="service_error_toast">网络不给力，无法连接到服务器</string>
+    <string name="net_error_toast">网络异常，暂时无法登录</string>
+    <string name="network_unconntcted_toast">网络未开启，请前往设置开启网络</string>
+    <string name="url_error_toast">输入的网络地址不合法，请重新输入</string>
+    <string name="back_btn">返回</string>
+    <string name="wf_comments">请输入流程办理意见</string>
+    <string name="done_btn">完成</string>
+    <string name="finish_title">结 束</string>
+
+    <string name="pull_to_refresh">下拉可以刷新</string>
+    <string name="release_to_refresh">释放立即刷新</string>
+    <string name="refreshing">正在刷新…</string>
+    <string name="not_updated_yet">暂未更新过</string>
+    <string name="updated_at">上次更新于%1$s前</string>
+    <string name="updated_just_now">刚刚更新</string>
+    <string name="time_error">时间有问题</string>
+</resources>

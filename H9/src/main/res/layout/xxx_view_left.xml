@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:weightSum="1">
+
+    <com.sdrzlyz.h9.view.RefreshableView
+
+        android:id="@+id/msg_refreshable_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0.9"
+        android:orientation="vertical">
+
+        <ListView
+            android:id="@+id/msgList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </com.sdrzlyz.h9.view.RefreshableView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.1"
+        android:weightSum="0.9">
+
+        <Button
+            android:id="@+id/unread_msg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.3"
+            android:text="未阅寻呼"/>
+
+        <Button
+            android:id="@+id/received_msg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.3"
+            android:text="已收寻呼"/>
+
+        <Button
+            android:id="@+id/stored_msg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.3"
+            android:text="收藏寻呼"/>
+    </LinearLayout>
+</LinearLayout>

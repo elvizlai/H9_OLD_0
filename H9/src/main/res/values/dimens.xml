@@ -1,0 +1,10 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="comments_text_size">12sp</dimen>
+    <dimen name="dealtime_text_size">10sp</dimen>
+    <dimen name="todolist_text_size">13sp</dimen>
+    <dimen name="finish_wf_title_text_size">30sp</dimen>
+
+</resources>
