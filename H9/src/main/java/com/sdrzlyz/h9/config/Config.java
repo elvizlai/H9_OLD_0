@@ -27,7 +27,7 @@ public class Config {
     }
 
     public String getServiceUrl() {
-        return sysPreference.getString("serviceUrl", defaultServiceUrl);
+        return sysPreference.getString("ServiceUrl", defaultServiceUrl);
     }
 
     public void setServiceUrl(String url) {

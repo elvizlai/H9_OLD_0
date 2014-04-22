@@ -1,8 +1,9 @@
 package com.sdrzlyz.h9.activity;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Intent;
-import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.JsonReader;
@@ -31,6 +32,7 @@ import java.util.zip.GZIPInputStream;
  * Created by sdrzlyz on 14-4-17.
  */
 public class TEST extends Activity {
+    SQLiteDatabase sqLiteDatabase;
     private Button test_btn;
     private ReturnContactInfosNewEst returnContactInfosNewEst;
 
@@ -67,25 +69,37 @@ public class TEST extends Activity {
                 TEST.this.startActivity(intent);
             }
         });
-        init();
+
         testpinyin();
         // other();
-        ContactsDBService.getContactsDBService().createContactsDB();
+        //ContactsDBService.getContactsDBService().createContactsDB();
 
 
-        String sql = "select name from CompanyContacts where DepartmentID='1077'";
-
-        Cursor cursor = ContactsDBService.getContactsDBService().getContactsDB().rawQuery(sql,null);
-
-        int id = cursor.getColumnIndex("Name");
-        System.out.println(id+" id");
-
-        if(cursor.moveToFirst()){
-            int idx = cursor.getColumnIndex("Name");
-            System.out.println(idx+" id");
-
-        }
-
+//        String sql = "select departname from Organization where parentdepartid='1'";
+//
+//        Cursor cursor = ContactsDBService.getContactsDBService().getContactsDB().rawQuery(sql, new String[]{});
+//
+//        int id = cursor.getColumnCount();
+//        System.out.println(id + " id");
+//
+//        System.out.println(cursor.getCount() + " count");
+//
+//        //System.out.println(cursor.getString(0));
+//
+//        StringBuilder stringBuilder = new StringBuilder();
+//        while (cursor.moveToNext()) {
+//            // cursor.moveToNext();
+//            String name = cursor.getString(0);
+//            //String dept = cursor.getString(1);
+//            stringBuilder.append(name + "    " + "dept" + "\n");
+//            //System.out.println(name + " name");
+//        }
+//
+//        TextView textView = new TextView(this);
+//        textView.setText(stringBuilder);
+//
+//        ScrollView scv = (ScrollView) findViewById(R.id.scv);
+//        scv.addView(textView);
 
 
         //System.out.println(cursor.getString(0));
@@ -97,10 +111,16 @@ public class TEST extends Activity {
 //            System.out.println(name1+" "+name2);
 //            //int age = cursor.getInt(2);//获取第三列的值
 //        }
-        cursor.close();
+        //cursor.close();
 
+        sqLiteDatabase = ContactsDBService.getContactsDBService().getContactsDB();
+//        ContentValues cv = new ContentValues();
+//        cv.put("parentdepartid", 1);
+//        cv.put("departname", "测试一下");
+//        sqLiteDatabase.insert("Organization", null, cv);
 
-
+        init();
+        ContactsDBService.getContactsDBService().updateContacts();
     }
 
     private void init() {
@@ -124,29 +144,155 @@ public class TEST extends Activity {
                     String str = uncompressToString(((ReturnContactInfosNew) result).getContactInfo());
 
                     try {
-                        returnContactInfosNewEst = (ReturnContactInfosNewEst) JSONUtil.parse(str,ReturnContactInfosNewEst.class);
+                        returnContactInfosNewEst = (ReturnContactInfosNewEst) JSONUtil.parse(str, ReturnContactInfosNewEst.class);
                     } catch (POAException e) {
                         e.printStackTrace();
                     }
 
                     List xx = returnContactInfosNewEst.getDeparts();
 
-                    for (Object x:xx){
+                    for (Object x : xx) {
                         System.out.println(x.toString());
                     }
 
-                    JsonReader jsonReader = new JsonReader(new StringReader(str));
-                    try {
-                        jsonReader.beginObject();
-                        while (jsonReader.hasNext()){
-                            JsonToken jsonToken = jsonReader.peek();
-                            if (jsonToken==JsonToken.NAME){
+                    String test_str = "{\"mes\":null,\"success\":1,\"addressListGroupInfos\":null,\"companyContacts\":null,\"crmContacts\":null,\"departs\":[{\"deptId\":\"1\",\"deptName\":\"上海华盖科技有限公司\",\"layer\":\"00001\",\"parentId\":\"\"},{\"deptId\":\"1069\",\"deptName\":\"华盖软件公司\",\"layer\":\"0000100001\",\"parentId\":\"1\"},{\"deptId\":\"1077\",\"deptName\":\"项目市场部\",\"layer\":\"000010000100001\",\"parentId\":\"1069\"},{\"deptId\":\"1078\",\"deptName\":\"产品研发部\",\"layer\":\"000010000100002\",\"parentId\":\"1069\"}],\"hasCompanyMore\":false,\"hasCrmMore\":false,\"hasDepartMore\":false,\"hasOWnMore\":false,\"hasPublicMore\":false,\"ownContacts\":null,\"publicContacts\":null}";
 
-                                System.out.println("name");
-                               
+                    JsonReader jsonReader = new JsonReader(new StringReader(str));
+
+                    JsonToken jsonToken = null;
+                    try {
+                        jsonToken = jsonReader.peek();
+                        List tt = new ArrayList();
+
+                        if (jsonToken == JsonToken.BEGIN_OBJECT) {
+                            System.out.println("------------------->beginObject");
+                            jsonReader.beginObject();
+                            while (jsonReader.hasNext()) {
+                                jsonToken = jsonReader.peek();
+                                if (jsonToken == JsonToken.NAME) {
+                                    String name = jsonReader.nextName();
+                                    if (name.equals("mes")) {
+                                        jsonToken = jsonReader.peek();
+                                        String mes = null;
+                                        if (jsonToken == JsonToken.STRING) {
+                                            mes = jsonReader.nextString();
+                                        } else {
+                                            jsonReader.skipValue();
+                                        }
+                                        System.out.println("mes:" + mes);
+                                    } else if (name.equals("success")) {
+                                        int success = jsonReader.nextInt();
+                                        System.out.println("success:" + success);
+                                    } else if (name.equals("addressListGroupInfos")) {
+                                        jsonToken = jsonReader.peek();
+                                        if (jsonToken == JsonToken.BEGIN_ARRAY) {
+                                            jsonReader.beginArray();
+                                            while (jsonReader.hasNext()) {
+                                                jsonReader.skipValue();
+                                            }
+                                            jsonReader.endArray();
+                                        } else {
+                                            System.out.println("addressListGroupInfos:null");
+                                        }
+                                    } else if (name.equals("companyContacts")) {
+                                        jsonToken = jsonReader.peek();
+                                        if (jsonToken == JsonToken.BEGIN_ARRAY) {
+                                            jsonReader.beginArray();
+                                            while (jsonReader.hasNext()) {
+                                                jsonReader.skipValue();
+                                            }
+                                            jsonReader.endArray();
+                                        } else {
+                                            System.out.println("companyContacts:null");
+                                        }
+                                    } else if (name.equals("crmContacts")) {
+                                        jsonToken = jsonReader.peek();
+                                        if (jsonToken == JsonToken.BEGIN_ARRAY) {
+                                            jsonReader.beginArray();
+                                            while (jsonReader.hasNext()) {
+                                                jsonReader.skipValue();
+                                            }
+                                            jsonReader.endArray();
+                                        } else {
+                                            System.out.println("crmContacts:null");
+                                        }
+                                    } else if (name.equals("departs")) {
+                                        jsonToken = jsonReader.peek();
+                                        if (jsonToken == JsonToken.BEGIN_ARRAY) {
+                                            System.out.println("array!!!!");
+                                            jsonReader.beginArray();
+                                            while (jsonReader.hasNext()) {
+                                                jsonReader.beginObject();
+                                                ContentValues cv = new ContentValues();
+                                                String key = null, value = null;
+                                                while (jsonReader.hasNext()) {
+                                                    key = jsonReader.nextName();
+                                                    jsonToken = jsonReader.peek();
+                                                    if (!(jsonToken == JsonToken.NULL)) {
+                                                        value = jsonReader.nextString();
+                                                    } else {
+                                                        jsonReader.skipValue();
+                                                    }
+                                                    cv.put(key, value);
+                                                }
+                                                jsonReader.endObject();
+
+                                                sqLiteDatabase.insert("Organization", null, cv);
+                                            }
+                                            jsonReader.endArray();
+                                        } else {
+                                            System.out.println("departs:null");
+                                        }
+                                    } else if (name.equals("hasCompanyMore")) {
+                                        boolean state = jsonReader.nextBoolean();
+                                        System.out.println("hasCompanyMore:" + state);
+                                    } else if (name.equals("hasCrmMore")) {
+                                        boolean state = jsonReader.nextBoolean();
+                                        System.out.println("hasCrmMore:" + state);
+                                    } else if (name.equals("hasDepartMore")) {
+                                        boolean state = jsonReader.nextBoolean();
+                                        System.out.println("hasDepartMore:" + state);
+                                    } else if (name.equals("hasOWnMore")) {
+                                        boolean state = jsonReader.nextBoolean();
+                                        System.out.println("hasOWnMore:" + state);
+                                    } else if (name.equals("hasPublicMore")) {
+                                        boolean state = jsonReader.nextBoolean();
+                                        System.out.println("hasPublicMore:" + state);
+                                    } else if (name.equals("ownContacts")) {
+                                        jsonToken = jsonReader.peek();
+                                        if (jsonToken == JsonToken.BEGIN_ARRAY) {
+                                            System.out.println("array!!!!");
+                                            jsonReader.beginArray();
+                                            while (jsonReader.hasNext()) {
+                                                jsonReader.skipValue();
+                                            }
+                                            jsonReader.endArray();
+                                        } else {
+                                            System.out.println("ownContacts:null");
+                                        }
+                                    } else if (name.equals("publicContacts")) {
+                                        jsonToken = jsonReader.peek();
+                                        if (jsonToken == JsonToken.BEGIN_ARRAY) {
+                                            System.out.println("array!!!!");
+                                            jsonReader.beginArray();
+                                            while (jsonReader.hasNext()) {
+                                                jsonReader.skipValue();
+                                            }
+                                            jsonReader.endArray();
+                                        } else {
+                                            System.out.println("publicContacts:null");
+                                        }
+                                    }
+                                } else {
+                                    jsonReader.skipValue();
+                                }
                             }
+
+                            jsonReader.endObject();
+                            System.out.println("<--------------------endObject");
                         }
-                        jsonReader.endObject();
+
+
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -219,9 +365,9 @@ public class TEST extends Activity {
         return root;
     }
 
-    public void testpinyin(){
+    public void testpinyin() {
         String[] pinyinArray = PinyinHelper.toHanyuPinyinStringArray('单');
-        for (String x:pinyinArray){
+        for (String x : pinyinArray) {
             System.out.println(x);
         }
     }

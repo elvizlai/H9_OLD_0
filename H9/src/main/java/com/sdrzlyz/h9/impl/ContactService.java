@@ -63,13 +63,13 @@ public class ContactService {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("sign", sign);
-            jsonObject.put("hasCompanyMore", 1);
-            jsonObject.put("hasCustomerMore", 1);
-            jsonObject.put("count", 1);
+            jsonObject.put("hasCompanyMore", 0);
+            jsonObject.put("hasCustomerMore", 0);
+            jsonObject.put("count", 0);
             jsonObject.put("hasDepartMore", 1);
-            jsonObject.put("hasPublicMore", 1);
-            jsonObject.put("hasOwnMore", 1);
-            jsonObject.put("size", 500);
+            jsonObject.put("hasPublicMore", 0);
+            jsonObject.put("hasOwnMore", 0);
+            jsonObject.put("size", 0);
         } catch (JSONException e) {
             e.printStackTrace();
         }

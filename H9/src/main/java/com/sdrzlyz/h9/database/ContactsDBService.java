@@ -2,9 +2,11 @@ package com.sdrzlyz.h9.database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
+import android.os.AsyncTask;
 import android.util.Log;
 import com.sdrzlyz.h9.config.ApplictionHandle;
+import com.sdrzlyz.h9.exception.POAException;
+import com.sdrzlyz.h9.impl.ContactService;
 
 /**
  * 主要用于联系人数据库写入
@@ -12,31 +14,33 @@ import com.sdrzlyz.h9.config.ApplictionHandle;
  */
 public class ContactsDBService {
     private static SQLiteDatabase contacts_db;
+    //private static ContactsDBService contactsDBService = new ContactsDBService();
 
     private ContactsDBService() {
-        contacts_db = ApplictionHandle.getContext().openOrCreateDatabase("hg_contacts", Context.MODE_PRIVATE, null);
+        contacts_db = ApplictionHandle.getContext().openOrCreateDatabase("hg_contacts.db", Context.MODE_PRIVATE, null);
+        createContactsDB();
     }
 
     public static ContactsDBService getContactsDBService() {
         return new ContactsDBService();
     }
 
-    public SQLiteDatabase getContactsDB(){
+    public SQLiteDatabase getContactsDB() {
         return contacts_db;
     }
 
-    public void createContactsDB() {
+    private void createContactsDB() {
         /**
          * 公司各个机构
          */
         String create_Organization = "CREATE TABLE IF NOT EXISTS Organization (" +
                 "ID integer PRIMARY KEY AUTOINCREMENT," +
-                "ServerID varchar(32)," +
-                "DepartFlag integer," +
-                "ParentDepartID varchar(32)," +
-                "DepartName varchar(32)," +
                 "Layer varchar(32)," +
+                "DeptId varchar(32)," +
+                "DeptName varchar(32)," +
+                "ParentId varchar(32)," +
                 "HasChild integer," +
+                "DepartFlag integer," +
                 "BelongID varchar(32)" +
                 ");";
 
@@ -174,10 +178,46 @@ public class ContactsDBService {
         contacts_db.execSQL(create_OwnGroups);
         contacts_db.execSQL(create_OwnContactsGroup);
         contacts_db.execSQL(create_OwnContacts);
-        Log.d("TAG","contacts_db created succ!");
+        //contacts_db.close();
+        Log.d("TAG", "contacts_db created succeed and closed!");
     }
 
-    public void deleteContactsDB(){
+    public void deleteContactsDB() {
+
+    }
+
+    public void updateContacts() {
+
+        final Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("hahaha");
+
+            }
+        };
+
+        new AsyncTask<Void, Integer, Object>() {
+
+            @Override
+            protected Object doInBackground(Void... voids) {
+                try {
+                    return ContactService.getContactService().getContactsNewEst();
+                } catch (POAException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(Object result) {
+                //super.onPostExecute(o);
+                if (result != null) {
+                    new Thread(runnable).start();
+                }
+
+            }
+        }.execute();
+
 
     }
 
