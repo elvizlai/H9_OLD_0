@@ -1,31 +1,20 @@
 package com.sdrzlyz.h9.activity;
 
 import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.JsonReader;
-import android.util.JsonToken;
 import android.view.View;
 import android.widget.Button;
 import com.sdrzlyz.h9.R;
-import com.sdrzlyz.h9.database.ContactsDBService;
-import com.sdrzlyz.h9.entity.ReturnContactInfosNew;
+import com.sdrzlyz.h9.database.ContactsDB;
 import com.sdrzlyz.h9.entity.ReturnContactInfosNewEst;
-import com.sdrzlyz.h9.exception.POAException;
-import com.sdrzlyz.h9.impl.ContactService;
 import com.sdrzlyz.h9.net.HttpClient;
 import com.sdrzlyz.h9.tree.Node;
-import com.sdrzlyz.h9.util.JSONUtil;
-import net.sourceforge.pinyin4j.PinyinHelper;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -70,14 +59,13 @@ public class TEST extends Activity {
             }
         });
 
-        testpinyin();
         // other();
-        //ContactsDBService.getContactsDBService().createContactsDB();
+        //ContactsDBService.createContactsDB().createContactsDB();
 
 
 //        String sql = "select departname from Organization where parentdepartid='1'";
 //
-//        Cursor cursor = ContactsDBService.getContactsDBService().getContactsDB().rawQuery(sql, new String[]{});
+//        Cursor cursor = ContactsDBService.createContactsDB().getContactsDB().rawQuery(sql, new String[]{});
 //
 //        int id = cursor.getColumnCount();
 //        System.out.println(id + " id");
@@ -113,217 +101,13 @@ public class TEST extends Activity {
 //        }
         //cursor.close();
 
-        sqLiteDatabase = ContactsDBService.getContactsDBService().getContactsDB();
+        sqLiteDatabase = ContactsDB.createContactsDB().getContactsDB();
 //        ContentValues cv = new ContentValues();
 //        cv.put("parentdepartid", 1);
 //        cv.put("departname", "测试一下");
 //        sqLiteDatabase.insert("Organization", null, cv);
 
-        init();
-        ContactsDBService.getContactsDBService().updateContacts();
-    }
-
-    private void init() {
-        new AsyncTask<Void, Integer, Object>() {
-
-            @Override
-            protected Object doInBackground(Void... voids) {
-                try {
-                    return ContactService.getContactService().getContactsNewEst();
-                } catch (POAException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-
-            }
-
-            @Override
-            protected void onPostExecute(Object result) {
-                if (result != null) {
-
-                    String str = uncompressToString(((ReturnContactInfosNew) result).getContactInfo());
-
-                    try {
-                        returnContactInfosNewEst = (ReturnContactInfosNewEst) JSONUtil.parse(str, ReturnContactInfosNewEst.class);
-                    } catch (POAException e) {
-                        e.printStackTrace();
-                    }
-
-                    List xx = returnContactInfosNewEst.getDeparts();
-
-                    for (Object x : xx) {
-                        System.out.println(x.toString());
-                    }
-
-                    String test_str = "{\"mes\":null,\"success\":1,\"addressListGroupInfos\":null,\"companyContacts\":null,\"crmContacts\":null,\"departs\":[{\"deptId\":\"1\",\"deptName\":\"上海华盖科技有限公司\",\"layer\":\"00001\",\"parentId\":\"\"},{\"deptId\":\"1069\",\"deptName\":\"华盖软件公司\",\"layer\":\"0000100001\",\"parentId\":\"1\"},{\"deptId\":\"1077\",\"deptName\":\"项目市场部\",\"layer\":\"000010000100001\",\"parentId\":\"1069\"},{\"deptId\":\"1078\",\"deptName\":\"产品研发部\",\"layer\":\"000010000100002\",\"parentId\":\"1069\"}],\"hasCompanyMore\":false,\"hasCrmMore\":false,\"hasDepartMore\":false,\"hasOWnMore\":false,\"hasPublicMore\":false,\"ownContacts\":null,\"publicContacts\":null}";
-
-                    JsonReader jsonReader = new JsonReader(new StringReader(str));
-
-                    JsonToken jsonToken = null;
-                    try {
-                        jsonToken = jsonReader.peek();
-                        List tt = new ArrayList();
-
-                        if (jsonToken == JsonToken.BEGIN_OBJECT) {
-                            System.out.println("------------------->beginObject");
-                            jsonReader.beginObject();
-                            while (jsonReader.hasNext()) {
-                                jsonToken = jsonReader.peek();
-                                if (jsonToken == JsonToken.NAME) {
-                                    String name = jsonReader.nextName();
-                                    if (name.equals("mes")) {
-                                        jsonToken = jsonReader.peek();
-                                        String mes = null;
-                                        if (jsonToken == JsonToken.STRING) {
-                                            mes = jsonReader.nextString();
-                                        } else {
-                                            jsonReader.skipValue();
-                                        }
-                                        System.out.println("mes:" + mes);
-                                    } else if (name.equals("success")) {
-                                        int success = jsonReader.nextInt();
-                                        System.out.println("success:" + success);
-                                    } else if (name.equals("addressListGroupInfos")) {
-                                        jsonToken = jsonReader.peek();
-                                        if (jsonToken == JsonToken.BEGIN_ARRAY) {
-                                            jsonReader.beginArray();
-                                            while (jsonReader.hasNext()) {
-                                                jsonReader.skipValue();
-                                            }
-                                            jsonReader.endArray();
-                                        } else {
-                                            System.out.println("addressListGroupInfos:null");
-                                        }
-                                    } else if (name.equals("companyContacts")) {
-                                        jsonToken = jsonReader.peek();
-                                        if (jsonToken == JsonToken.BEGIN_ARRAY) {
-                                            jsonReader.beginArray();
-                                            while (jsonReader.hasNext()) {
-                                                jsonReader.skipValue();
-                                            }
-                                            jsonReader.endArray();
-                                        } else {
-                                            System.out.println("companyContacts:null");
-                                        }
-                                    } else if (name.equals("crmContacts")) {
-                                        jsonToken = jsonReader.peek();
-                                        if (jsonToken == JsonToken.BEGIN_ARRAY) {
-                                            jsonReader.beginArray();
-                                            while (jsonReader.hasNext()) {
-                                                jsonReader.skipValue();
-                                            }
-                                            jsonReader.endArray();
-                                        } else {
-                                            System.out.println("crmContacts:null");
-                                        }
-                                    } else if (name.equals("departs")) {
-                                        jsonToken = jsonReader.peek();
-                                        if (jsonToken == JsonToken.BEGIN_ARRAY) {
-                                            System.out.println("array!!!!");
-                                            jsonReader.beginArray();
-                                            while (jsonReader.hasNext()) {
-                                                jsonReader.beginObject();
-                                                ContentValues cv = new ContentValues();
-                                                String key = null, value = null;
-                                                while (jsonReader.hasNext()) {
-                                                    key = jsonReader.nextName();
-                                                    jsonToken = jsonReader.peek();
-                                                    if (!(jsonToken == JsonToken.NULL)) {
-                                                        value = jsonReader.nextString();
-                                                    } else {
-                                                        jsonReader.skipValue();
-                                                    }
-                                                    cv.put(key, value);
-                                                }
-                                                jsonReader.endObject();
-
-                                                sqLiteDatabase.insert("Organization", null, cv);
-                                            }
-                                            jsonReader.endArray();
-                                        } else {
-                                            System.out.println("departs:null");
-                                        }
-                                    } else if (name.equals("hasCompanyMore")) {
-                                        boolean state = jsonReader.nextBoolean();
-                                        System.out.println("hasCompanyMore:" + state);
-                                    } else if (name.equals("hasCrmMore")) {
-                                        boolean state = jsonReader.nextBoolean();
-                                        System.out.println("hasCrmMore:" + state);
-                                    } else if (name.equals("hasDepartMore")) {
-                                        boolean state = jsonReader.nextBoolean();
-                                        System.out.println("hasDepartMore:" + state);
-                                    } else if (name.equals("hasOWnMore")) {
-                                        boolean state = jsonReader.nextBoolean();
-                                        System.out.println("hasOWnMore:" + state);
-                                    } else if (name.equals("hasPublicMore")) {
-                                        boolean state = jsonReader.nextBoolean();
-                                        System.out.println("hasPublicMore:" + state);
-                                    } else if (name.equals("ownContacts")) {
-                                        jsonToken = jsonReader.peek();
-                                        if (jsonToken == JsonToken.BEGIN_ARRAY) {
-                                            System.out.println("array!!!!");
-                                            jsonReader.beginArray();
-                                            while (jsonReader.hasNext()) {
-                                                jsonReader.skipValue();
-                                            }
-                                            jsonReader.endArray();
-                                        } else {
-                                            System.out.println("ownContacts:null");
-                                        }
-                                    } else if (name.equals("publicContacts")) {
-                                        jsonToken = jsonReader.peek();
-                                        if (jsonToken == JsonToken.BEGIN_ARRAY) {
-                                            System.out.println("array!!!!");
-                                            jsonReader.beginArray();
-                                            while (jsonReader.hasNext()) {
-                                                jsonReader.skipValue();
-                                            }
-                                            jsonReader.endArray();
-                                        } else {
-                                            System.out.println("publicContacts:null");
-                                        }
-                                    }
-                                } else {
-                                    jsonReader.skipValue();
-                                }
-                            }
-
-                            jsonReader.endObject();
-                            System.out.println("<--------------------endObject");
-                        }
-
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-
-                }
-            }
-        }.execute();
-    }
-
-
-    private void other() {
-        new AsyncTask<Void, Integer, Object>() {
-
-            @Override
-            protected Object doInBackground(Void... voids) {
-                try {
-                    return ContactService.getContactService().getContactsForCompress();
-                } catch (POAException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-
-            @Override
-            protected void onPostExecute(Object result) {
-                if (result != null) {
-                    uncompressToString(((ReturnContactInfosNew) result).getContactInfo());
-                }
-            }
-        }.execute();
+        ContactsDB.createContactsDB().updateContacts();
     }
 
 
@@ -365,10 +149,4 @@ public class TEST extends Activity {
         return root;
     }
 
-    public void testpinyin() {
-        String[] pinyinArray = PinyinHelper.toHanyuPinyinStringArray('单');
-        for (String x : pinyinArray) {
-            System.out.println(x);
-        }
-    }
 }

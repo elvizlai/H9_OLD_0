@@ -6,7 +6,6 @@ import com.sdrzlyz.h9.entity.ReturnContactInfosNew;
 import com.sdrzlyz.h9.exception.POAException;
 import com.sdrzlyz.h9.net.HttpClient;
 import com.sdrzlyz.h9.util.JSONUtil;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -59,17 +58,17 @@ public class ContactService {
 
     }
 
-    public MessagesInfo getContactsNewEst() throws POAException {
+    public MessagesInfo getContactsNewEst(int hasCompanyMore, int hasCustomerMore, int hasDepartMore, int hasPublicMore, int hasOwnMore, int size) throws POAException {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("sign", sign);
-            jsonObject.put("hasCompanyMore", 0);
-            jsonObject.put("hasCustomerMore", 0);
+            jsonObject.put("hasCompanyMore", hasCompanyMore);
+            jsonObject.put("hasCustomerMore", hasCustomerMore);
             jsonObject.put("count", 0);
-            jsonObject.put("hasDepartMore", 1);
-            jsonObject.put("hasPublicMore", 0);
-            jsonObject.put("hasOwnMore", 0);
-            jsonObject.put("size", 0);
+            jsonObject.put("hasDepartMore", hasDepartMore);
+            jsonObject.put("hasPublicMore", hasPublicMore);
+            jsonObject.put("hasOwnMore", hasOwnMore);
+            jsonObject.put("size", size);
         } catch (JSONException e) {
             e.printStackTrace();
         }

@@ -16,7 +16,7 @@ public class ManipulateContacts {
             @Override
             protected Object doInBackground(Void... voids) {
                 try {
-                    return ContactService.getContactService().getContactsNewEst();
+                    return ContactService.getContactService().getContactsNewEst(0,0,1,0,0,0);
                 } catch (POAException e) {
                     e.printStackTrace();
                     return null;
