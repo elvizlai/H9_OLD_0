@@ -8,7 +8,7 @@ import android.util.Log;
 /**
  * Created by sdrzlyz on 14-3-26.
  */
-public class CheckNetwork {
+public class NetCHK {
     public static boolean isConnect(Context context) {
         // 获取手机所有连接管理对象（包括对wi-fi,net等连接的管理）
         try {

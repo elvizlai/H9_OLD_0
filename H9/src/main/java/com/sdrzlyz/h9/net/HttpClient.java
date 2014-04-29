@@ -2,11 +2,7 @@ package com.sdrzlyz.h9.net;
 
 import com.sdrzlyz.h9.exception.POAException;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -37,7 +33,7 @@ public class HttpClient {
 
 
     public byte[] requestByte(String url, String s1) throws POAException {
-        HttpURLConnection urlConnection;
+        HttpURLConnection urlConnection = null;
         try {
             urlConnection = (HttpURLConnection) new URL(url).openConnection();
             urlConnection.setRequestProperty("content-type", "application/json");
@@ -47,6 +43,7 @@ public class HttpClient {
             urlConnection.setReadTimeout(timeout);
             urlConnection.setConnectTimeout(timeout);
             urlConnection.getOutputStream().write(s1.getBytes("utf-8"));
+
 
             System.out.println(urlConnection.getResponseCode());
             System.out.println(urlConnection.getResponseMessage());
@@ -70,6 +67,9 @@ public class HttpClient {
             throw new POAException(3);
         } catch (NullPointerException localNullPointerException) {
             throw new POAException(3);
+        } finally {
+            if (urlConnection != null)
+                urlConnection.disconnect();
         }
 
     }
@@ -115,6 +115,5 @@ public class HttpClient {
         } catch (IOException localIOException) {
             throw new POAException(3);
         }
-        //   return null;
     }
 }

@@ -7,9 +7,12 @@ import android.app.Activity;
  */
 public abstract class BaseActivity extends Activity {
 
+    //恢复数据，一般是本地化存储的模块
     protected abstract void restoreState();
 
+    //初始化界面
     protected abstract void initView();
 
+    //绑定事件监听
     protected abstract void setListener();
 }

@@ -57,6 +57,8 @@ public class Loading extends Activity {
             @Override
             protected Object doInBackground(Void... voids) {
                 try {
+                    System.out.println("00000000000000:"+LoginService.getLoginService().getServerVison());
+
                     messagesInfo = LoginService.getLoginService().LoginEst("", "");
                     return null;
                 } catch (POAException e) {
@@ -66,6 +68,7 @@ public class Loading extends Activity {
                 }
             }
 
+            @SuppressWarnings("ggd")
             @Override
             protected void onPostExecute(Object result) {
                 super.onPostExecute(result);

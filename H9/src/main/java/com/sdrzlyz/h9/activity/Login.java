@@ -5,15 +5,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.EditText;
-import android.widget.Toast;
-
+import android.view.*;
+import android.widget.*;
 import com.sdrzlyz.h9.R;
 import com.sdrzlyz.h9.config.Config;
 import com.sdrzlyz.h9.test.Test;
@@ -34,24 +27,33 @@ public class Login extends BaseActivity {
     private long mExitTime;
 
 
+    /**
+     * 从上一个activity返回后需要处理这些消息!!CAUTION!!返回的不要用0做标志位，默认就是0
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //返回的不要用0做标志位，默认就是0
-        super.onActivityResult(requestCode, resultCode, data);
+        //情况只可能是下列情况的其中之一
 
+        //服务器地址有问题
         if (requestCode == 1 && resultCode == 19) {
-            showAlertDialog();
+            showNetSettingDialog();
         }
-        if (requestCode == 1 && resultCode == 3) {
-            //网络异常，网速很差，超时或者连不上
+        //网络异常
+        else if (requestCode == 1 && resultCode == 3) {
             Config.getInstance().setIsAutologin(false);
         }
-        if (requestCode == 1 && resultCode == -1) {
-            //帐号不对头，应该把密码置空，并把自动登录项目关掉
+        //帐号不对头，应该把密码置空，并把自动登录项目关掉
+        else if (requestCode == 1 && resultCode == -1) {
+
             ed_password.setText("");
             Config.getInstance().setPassword("");
             Config.getInstance().setIsAutologin(false);
         }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -137,7 +139,7 @@ public class Login extends BaseActivity {
     }
 
 
-    private void showAlertDialog() {
+    private void showNetSettingDialog() {
         final LayoutInflater factory = LayoutInflater.from(Login.this);
         final View view = factory.inflate(R.layout.url_setting, null);
         final EditText ed_url = (EditText) view.findViewById(R.id.url);//获得输入框对象
@@ -209,8 +211,40 @@ public class Login extends BaseActivity {
         return super.onKeyDown(keyCode, event);
     }
 
-    private class btnClickedHandler implements View.OnClickListener {
+    /**
+     * 为menu按键绑定事件
+     *
+     * @param menu
+     * @return
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.login, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
 
+    /**
+     * 点击menu具体条目触发
+     *
+     * @param item
+     * @return
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                showNetSettingDialog();
+                return true;
+            case R.id.about_me:
+                ToastUtil.showMsg("@Author:sdrzlyz");
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private class btnClickedHandler implements View.OnClickListener {
         @Override
         public void onClick(View view) {
             switch (view.getId()) {
@@ -218,7 +252,7 @@ public class Login extends BaseActivity {
                     login();
                     break;
                 case R.id.urlSetting:
-                    showAlertDialog();
+                    showNetSettingDialog();
                     break;
                 default:
                     break;
@@ -227,7 +261,6 @@ public class Login extends BaseActivity {
     }
 
     private class checkChangedHandler implements CompoundButton.OnCheckedChangeListener {
-
         @Override
         public void onCheckedChanged(CompoundButton compoundButton, boolean chkState) {
             switch (compoundButton.getId()) {

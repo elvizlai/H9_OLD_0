@@ -1,11 +1,13 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/apk/res-auto"
-      xmlns:tools="http://schemas.android.com/tools"
-      tools:context="com.sdrzlyz.h9.activity.Login_Activity">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+
 
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"
-        app:showAsAction="never"/>
+            android:id="@+id/action_settings"
+            android:title="@string/net_setting"/>
+
+    <item
+            android:id="@+id/about_me"
+            android:title="关于"/>
+
 </menu>
