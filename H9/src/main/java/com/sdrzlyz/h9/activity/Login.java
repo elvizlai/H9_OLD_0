@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 public class Login extends BaseActivity {
     private EditText ed_account, ed_password;
     private CheckBox cb_isRempsw, cb_isAutologin;
-    private Button btn_login, btn_urlSetting;
+    private Button btn_login, btn_netSetting;
     private long mExitTime;
 
 
@@ -65,57 +65,11 @@ public class Login extends BaseActivity {
         setListener();
     }
 
-
     @Override
     protected void onResume() {
+        Test.LogD("Login_onResume");
         super.onResume();
         restoreState();
-    }
-
-    @Override
-    protected void restoreState() {
-        ed_account.setText(Config.getInstance().getAccount());
-        cb_isRempsw.setChecked(Config.getInstance().getIsRempsw());
-        cb_isAutologin.setChecked(Config.getInstance().getIsAutologin());
-        if (cb_isRempsw.isChecked()) {
-            String psw = Config.getInstance().getPassword();
-            if (!psw.equals(""))
-                ed_password.setText(Encrypt.decryptPsw(psw));
-        }
-
-    }
-
-
-    private void login() {
-        String account = ed_account.getText().toString().trim();
-        String password = ed_password.getText().toString().trim();
-        if (account.equals("") || password.equals("")) {
-            ToastUtil.showMsg(this, "帐号或密码不能为空");
-            return;
-        }
-
-        Test.LogD("acc:" + account + ",psw:" + password);
-
-
-        //保存帐号
-        Config.getInstance().setAccount(account);
-        //保存密码,不论如何，该密码是一定要保存的。。。为了鉴权的需要
-        Config.getInstance().setPassword(Encrypt.encryptPsw(password));
-
-
-        Test.LogD("saveACC:" + Config.getInstance().getAccount());
-
-        Test.LogD("savePsw:" + Config.getInstance().getPassword());
-
-
-        //保存用户的设置
-        Config.getInstance().setIsRempsw(cb_isRempsw.isChecked());
-        Config.getInstance().setIsAutologin(cb_isAutologin.isChecked());
-
-        Intent intent = new Intent(this, Loading.class);
-        intent.putExtra("account", account);
-        intent.putExtra("password", password);
-        startActivityForResult(intent, 1);
     }
 
     @Override
@@ -127,7 +81,7 @@ public class Login extends BaseActivity {
         cb_isAutologin = (CheckBox) findViewById(R.id.isAutologin);
 
         btn_login = (Button) findViewById(R.id.login);
-        btn_urlSetting = (Button) findViewById(R.id.urlSetting);
+        btn_netSetting = (Button) findViewById(R.id.netSetting);
     }
 
     @Override
@@ -135,7 +89,53 @@ public class Login extends BaseActivity {
         cb_isRempsw.setOnCheckedChangeListener(new checkChangedHandler());
         cb_isAutologin.setOnCheckedChangeListener(new checkChangedHandler());
         btn_login.setOnClickListener(new btnClickedHandler());
-        btn_urlSetting.setOnClickListener(new btnClickedHandler());
+        btn_netSetting.setOnClickListener(new btnClickedHandler());
+    }
+
+    @Override
+    protected void restoreState() {
+        ed_account.setText(Config.getInstance().getAccount());
+        cb_isRempsw.setChecked(Config.getInstance().getIsRempsw());
+
+        //如果密码记忆选项开启的话，就恢复下密码
+        if (cb_isRempsw.isChecked()) {
+            String psw = Config.getInstance().getPassword();
+            if (psw != null && !psw.equals(""))
+                ed_password.setText(Encrypt.decryptPsw(psw));
+        }
+
+        cb_isAutologin.setChecked(Config.getInstance().getIsAutologin());
+
+        if (cb_isAutologin.isChecked()) {
+            //直接登录
+            login();
+        }
+    }
+
+
+    private void login() {
+        String account = ed_account.getText().toString().trim();
+        String password = ed_password.getText().toString().trim();
+
+        if (account.equals("") || password.equals("")) {
+            ToastUtil.showMsg(this, "帐号或密码不能为空，请检查");
+            return;
+        }
+
+        //保存帐号
+        Config.getInstance().setAccount(account);
+        //保存密码,不论如何，该密码是一定要保存的。。。为了鉴权的需要
+        Config.getInstance().setPassword(Encrypt.encryptPsw(password));
+
+
+        //保存用户的设置
+        Config.getInstance().setIsRempsw(cb_isRempsw.isChecked());
+        Config.getInstance().setIsAutologin(cb_isAutologin.isChecked());
+
+        Intent intent = new Intent(this, Loading.class);
+        intent.putExtra("account", account);
+        intent.putExtra("password", password);
+        startActivityForResult(intent, 1);
     }
 
 
@@ -251,7 +251,7 @@ public class Login extends BaseActivity {
                 case R.id.login:
                     login();
                     break;
-                case R.id.urlSetting:
+                case R.id.netSetting:
                     showNetSettingDialog();
                     break;
                 default:

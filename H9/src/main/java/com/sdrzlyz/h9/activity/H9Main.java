@@ -1,5 +1,6 @@
 package com.sdrzlyz.h9.activity;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,13 +15,13 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
-
 import com.sdrzlyz.h9.R;
 import com.sdrzlyz.h9.adapter.MsgAdapter;
 import com.sdrzlyz.h9.adapter.ViewPagerAdapter;
 import com.sdrzlyz.h9.adapter.WFAdapter;
 import com.sdrzlyz.h9.entity.CallNew;
 import com.sdrzlyz.h9.entity.WorkFlowList;
+import com.sdrzlyz.h9.service.MainService;
 import com.sdrzlyz.h9.test.Test;
 import com.sdrzlyz.h9.view.RefreshableView;
 import com.sdrzlyz.h9.webservice.GetMsgList;
@@ -33,7 +34,8 @@ import java.util.List;
  * Created by sdrzlyz on 14-4-12.
  */
 public class H9Main extends BaseActivity {
-    private final String STATEFROMMAINSERVICE = "com.sdrzlyz.h9.STATEFROMMAINSERVICE";
+    final private String STATE_FROM_ACTIVITY = "com.sdrzlyz.h9.activity.H9Main";
+    final private String STATE_FROM_MAINSERVICE = "com.sdrzlyz.h9.service.MainService";
     private long mExitTime;
     private GetMsgList getMsgList;
     private GetWFList getWFList;
@@ -75,31 +77,32 @@ public class H9Main extends BaseActivity {
         Test.LogD("requestCode:" + requestCode + ",resultCode:" + resultCode);
         if (requestCode == 1 && resultCode == 1) {
             Test.LogD("说明消息需要刷新一下!,延时1秒后刷新");
-
-            //延时1秒后刷新
             getMsgList();
         }
+
         if (requestCode == 2 && resultCode == 2) {
             Test.LogD("说明工作流需要刷新一下!");
             getWFList();
+
         }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.view_p);
-
+        setContentView(R.layout.view_pager);
         Test.LogD("onCreate........");
 
-        Test.LogD("H9Main 注册广播监听");
+
+        Intent intent = new Intent(H9Main.this, MainService.class);
+        startService(intent);
+
         stateChangedBroadcastReceiver(true);
 
         //初始化列表及标题栏
         initViewList();
         initTitleList();
         initView();
-
         setListener();
         //第一次登录时需要获取信息
         getMsgList();
@@ -107,42 +110,63 @@ public class H9Main extends BaseActivity {
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Test.LogD("H9Main onNewIntent......");
+
+        currentItem = intent.getIntExtra("currentItem", 1);
+
+        if (currentItem == 0) {
+            getMsgList();
+        } else if (currentItem == 2) {
+            getWFList();
+        }
+        mainView.setCurrentItem(currentItem);
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
         Test.LogD("H9Main onStart......");
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Test.LogD("H9Main onResume......");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Test.LogD("H9Main onStop......");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Test.LogD("H9Main onStop......");
+        Test.LogD("H9Main onDestroy......");
 
         //注销广播监听
         stateChangedBroadcastReceiver(false);
-    }
+        Intent intent = new Intent(H9Main.this, MainService.class);
+        stopService(intent);
 
+        Intent home_screen = new Intent();
+        home_screen.setAction(Intent.ACTION_MAIN);
+        home_screen.addCategory(Intent.CATEGORY_HOME);
+        startActivity(home_screen);
 
-    @Override
-    protected void initView() {
-        mainView = (ViewPager) findViewById(R.id.viewpager);
-        viewPagerAdapter = new ViewPagerAdapter(viewList, titleList);
-        mainView.setAdapter(viewPagerAdapter);
-        mainView.setCurrentItem(currentItem);
+        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        manager.killBackgroundProcesses(getPackageName());
+        System.exit(0);
+
     }
 
     @Override
     protected void restoreState() {
 
     }
-
-    @Override
-    protected void setListener() {
-        unReadMsgBtn.setOnClickListener(new btnClickedHandler());
-        acceptMsgBtn.setOnClickListener(new btnClickedHandler());
-        collectMsgBtn.setOnClickListener(new btnClickedHandler());
-    }
-
 
     public void initViewList() {
         /**
@@ -152,7 +176,7 @@ public class H9Main extends BaseActivity {
 
         LayoutInflater layoutInflater = getLayoutInflater().from(this);
 
-        view_left = layoutInflater.inflate(R.layout.view_l, null);
+        view_left = layoutInflater.inflate(R.layout.view_left, null);
         view_midddle = layoutInflater.inflate(R.layout.view_middle, null);
         view_right = layoutInflater.inflate(R.layout.view_right, null);
 
@@ -164,6 +188,7 @@ public class H9Main extends BaseActivity {
 
         Button test = (Button) view_midddle.findViewById(R.id.test);
 
+
         test.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -172,6 +197,22 @@ public class H9Main extends BaseActivity {
             }
         });
 
+        Button voice = (Button) view_midddle.findViewById(R.id.voice);
+        voice.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(H9Main.this, Voice.class);
+                startActivity(intent);
+            }
+        });
+
+        Button quit = (Button) view_midddle.findViewById(R.id.quit);
+        quit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                H9Main.this.onDestroy();
+            }
+        });
 
         msgListView = (ListView) view_left.findViewById(R.id.msgList);
 
@@ -206,22 +247,38 @@ public class H9Main extends BaseActivity {
         viewList.add(view_right);
     }
 
-
     public void initTitleList() {
         /**
          * 此处加载3个页面对应的标题栏
          */
-        titleList = new ArrayList<String>();
-        String default_msgTitle = "未阅寻呼";
-        if (msgType == 1) {
-            default_msgTitle = "已收寻呼";
+
+        if (titleList == null)
+            titleList = new ArrayList<String>();
+        titleList.clear();
+
+        if (msgType == 1 || msgType == 3) {
+            titleList.add(msgType == 1 ? "已收寻呼" : "保留寻呼");
+        } else {
+            titleList.add("未阅寻呼(" + totalMsgNum + ")");
         }
-        if (msgType == 3) {
-            default_msgTitle = "保留寻呼";
-        }
-        titleList.add(default_msgTitle + "(" + (newMsgNum != 0 ? "" : newMsgNum + "") + ")");
+
         titleList.add("主页");
-        titleList.add("(" + (newWfNum != 0 ? "" : newWfNum + "") + ")" + "待办流程");
+        titleList.add("(" + totalWFNum + ")" + "待办流程");
+    }
+
+    @Override
+    protected void initView() {
+        mainView = (ViewPager) findViewById(R.id.viewpager);
+        viewPagerAdapter = new ViewPagerAdapter(viewList, titleList);
+        mainView.setAdapter(viewPagerAdapter);
+        mainView.setCurrentItem(currentItem);
+    }
+
+    @Override
+    protected void setListener() {
+        unReadMsgBtn.setOnClickListener(new btnClickedHandler());
+        acceptMsgBtn.setOnClickListener(new btnClickedHandler());
+        collectMsgBtn.setOnClickListener(new btnClickedHandler());
     }
 
 
@@ -308,8 +365,8 @@ public class H9Main extends BaseActivity {
             //注销监听器
             unregisterReceiver(stateChangedReceiver);
         } else {
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(STATEFROMMAINSERVICE);//过滤从MainService中的消息
+            System.out.println("------------------------>H9Main 开始监听广播");
+            IntentFilter filter = new IntentFilter(STATE_FROM_MAINSERVICE);
             H9Main.this.registerReceiver(stateChangedReceiver, filter);
         }
     }
@@ -353,6 +410,8 @@ public class H9Main extends BaseActivity {
                 default:
                     break;
             }
+            initTitleList();
+            viewPagerAdapter.notifyDataSetChanged();
         }
     }
 
@@ -395,7 +454,6 @@ public class H9Main extends BaseActivity {
             if (workFlowList.size() == 0) {
                 return;
             }
-
             Intent intent = new Intent(H9Main.this, WFDetail.class);
             intent.putExtra("appID", workFlowList.get(position).getAppID());
             startActivityForResult(intent, 2);
@@ -405,13 +463,16 @@ public class H9Main extends BaseActivity {
     private class StateChangedReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            System.out.println("前台收到广播");
-            System.out.println(context + " co");
-            System.out.println(intent + " in");
+            System.out.println("前台收到广播:" + context + "," + intent);
             Bundle bundle = intent.getExtras();
-//            if (bundle.getBoolean("WFListNeedRefresh", false)) {
-//                getWFList();
-//            }
+            if (bundle.getBoolean("NEED_REFRESH", false)) {
+                totalMsgNum = bundle.getLong("CallNumTotal", 0L);
+                totalWFNum = bundle.getLong("WfNumTotal", 0L);
+                System.out.println("寻呼:" + totalMsgNum + ",待办流程:" + totalWFNum + " 需要更新");
+                msgType = 2;
+                initTitleList();
+                viewPagerAdapter.notifyDataSetChanged();
+            }
         }
     }
 

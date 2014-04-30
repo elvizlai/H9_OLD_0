@@ -32,7 +32,7 @@ public class HttpClient {
     }
 
 
-    public byte[] requestByte(String url, String s1) throws POAException {
+    public byte[] requestByte(String url, String s) throws POAException {
         HttpURLConnection urlConnection = null;
         try {
             urlConnection = (HttpURLConnection) new URL(url).openConnection();
@@ -42,11 +42,10 @@ public class HttpClient {
             urlConnection.setDoOutput(true);
             urlConnection.setReadTimeout(timeout);
             urlConnection.setConnectTimeout(timeout);
-            urlConnection.getOutputStream().write(s1.getBytes("utf-8"));
+            urlConnection.getOutputStream().write(s.getBytes("utf-8"));
 
-
-            System.out.println(urlConnection.getResponseCode());
-            System.out.println(urlConnection.getResponseMessage());
+            System.out.println("ResponseCode:"+urlConnection.getResponseCode());
+            System.out.println("ResponseMessage:"+urlConnection.getResponseMessage());
 
             if (urlConnection.getResponseCode() == 500)
                 throw new POAException(19);
@@ -60,7 +59,6 @@ public class HttpClient {
             inputStream.close();
             urlConnection.disconnect();
             return bytes;
-
         } catch (MalformedURLException localMalformedURLException) {
             throw new POAException(19);
         } catch (IOException localIOException) {
@@ -73,7 +71,6 @@ public class HttpClient {
         }
 
     }
-
 
     public byte[] readStream(InputStream inputStream) throws IOException {
         BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
@@ -93,27 +90,29 @@ public class HttpClient {
     }
 
     public byte[] getDataFromURL(String s) throws POAException {
-        HttpURLConnection httpURLConnection;
+        HttpURLConnection httpURLConnection = null;
         try {
             httpURLConnection = (HttpURLConnection) new URL(s).openConnection();
             httpURLConnection.setDoInput(true);
             httpURLConnection.setReadTimeout(timeout);
             httpURLConnection.setConnectTimeout(timeout);
             if (httpURLConnection.getResponseCode() == 500)
-                throw new POAException("服务器地址错误！");
+                throw new POAException(19);
             if (httpURLConnection.getResponseCode() == 404)
-                throw new POAException("帐号地址错误！");
+                throw new POAException(19);
             if (httpURLConnection.getResponseCode() != 200)
-                throw new POAException("服务器连接错误！");
+                throw new POAException(3);
             InputStream inputStream = httpURLConnection.getInputStream();
             byte[] arrayOfByte = readStream(inputStream);
             inputStream.close();
-            httpURLConnection.disconnect();
             return arrayOfByte;
         } catch (MalformedURLException localMalformedURLException) {
             throw new POAException(19);
         } catch (IOException localIOException) {
             throw new POAException(3);
+        } finally {
+            if (httpURLConnection != null)
+                httpURLConnection.disconnect();
         }
     }
 }

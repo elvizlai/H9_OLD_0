@@ -111,11 +111,11 @@ public class TEST extends Activity {
 
         ContactsDB.createContactsDB().updateContacts();
 
-        try {
-            System.out.println("111111111111111:"+LoginService.getLoginService().getServerVison());
-        } catch (POAException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            System.out.println("111111111111111:"+LoginService.getLoginService().getServerVison());
+//        } catch (POAException e) {
+//            e.printStackTrace();
+//        }
     }
 
 

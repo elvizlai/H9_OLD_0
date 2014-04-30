@@ -28,12 +28,7 @@ public class GetUnreadNew extends AsyncTask<Void, Integer, Object> {
 
     @Override
     protected Object doInBackground(Void... voids) {
-        try {
             return LoginService.getLoginService().getUnreadNew("", "");
-        } catch (POAException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     @Override

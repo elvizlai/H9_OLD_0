@@ -7,7 +7,6 @@ import com.sdrzlyz.h9.entity.UnReadCountNew;
 import com.sdrzlyz.h9.exception.POAException;
 import com.sdrzlyz.h9.net.HttpClient;
 import com.sdrzlyz.h9.util.JSONUtil;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -41,11 +40,15 @@ public class LoginService {
      */
     public String getServerVison() throws POAException {
         String url = Config.getInstance().getServiceUrl().replace("POSTServiceForAndroid.svc", "ClientInfo/VersionInfo.txt");
-        byte[] dataFromURL = new HttpClient().getDataFromURL(url);
-        if (dataFromURL.length > 0) {
-            return new String(dataFromURL);
-        } else {
-            throw new POAException(3);
+        try {
+            byte[] dataFromURL = new HttpClient().getDataFromURL(url);
+            if (dataFromURL.length > 0) {
+                return new String(dataFromURL);
+            } else {
+                return "";
+            }
+        } catch (POAException exp) {
+            throw exp;
         }
     }
 
@@ -55,13 +58,13 @@ public class LoginService {
      * @return 登录成功后的返回信息
      * @throws POAException
      */
-    public MessagesInfo LoginEst(String widthPixels, String heightPixels) throws POAException {
+    public MessagesInfo LoginEst(int widthPixels, int heightPixels) throws POAException {
 
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("sign", sign);
-            jsonObject.put("widthPixels", widthPixels);
-            jsonObject.put("heightPixels", heightPixels);
+            jsonObject.put("widthPixels", widthPixels + "");
+            jsonObject.put("heightPixels", heightPixels + "");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -81,7 +84,7 @@ public class LoginService {
      * @return 时间段内的未读寻呼数、待办流程数量、总未读寻呼数、总待办流程数量、服务器当前时间
      * @throws POAException
      */
-    public MessagesInfo getUnreadNew(String lastCallTime, String lastWkTime) throws POAException {
+    public MessagesInfo getUnreadNew(String lastCallTime, String lastWkTime) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("sign", sign);
@@ -97,7 +100,8 @@ public class LoginService {
             String resFromService = httpClient.request(serviceUrl + "/getUnreadNew", jsonObject.toString());
             return JSONUtil.parse(resFromService, UnReadCountNew.class);
         } catch (POAException e) {
-            throw e;
+            e.printStackTrace();
+            return null;
         }
     }
 

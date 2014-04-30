@@ -44,14 +44,14 @@ public class JSONUtil {
         return s;
     }
 
-    public static MessagesInfo parse(String s, Class class1) throws POAException {
+    public static MessagesInfo parse(String str, Class cls) throws POAException {
         if (objectMapper == null)
             objectMapper = new ObjectMapper();
         MessagesInfo messagesinfo;
         try {
             if (jsonGenerator == null)
                 jsonGenerator = objectMapper.getJsonFactory().createJsonGenerator(System.out, JsonEncoding.UTF8);
-            messagesinfo = (MessagesInfo) objectMapper.readValue(s, class1);
+            messagesinfo = (MessagesInfo) objectMapper.readValue(str, cls);
             if (messagesinfo.getSuccess() != 1)
                 throw new POAException(messagesinfo.getSuccess(), messagesinfo.getMes());
         } catch (JsonParseException jsonparseexception) {

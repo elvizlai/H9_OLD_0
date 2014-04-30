@@ -35,39 +35,39 @@ public class POAException extends Exception {
     private String errormessage;
 
     static {
-        codeProperties.put(Integer.valueOf(0), "操作成功");
-        codeProperties.put(Integer.valueOf(1), "图片获取异常");
-        codeProperties.put(Integer.valueOf(2), "XML解析异常");
-        codeProperties.put(Integer.valueOf(3), "网络异常");
-        codeProperties.put(Integer.valueOf(4), "记录不存在");
-        codeProperties.put(Integer.valueOf(5), "栏目名称异常");
-        codeProperties.put(Integer.valueOf(20), "服务器返回错误");
-        codeProperties.put(Integer.valueOf(6), "获取位置异常");
-        codeProperties.put(Integer.valueOf(8), "保存异常服务问题");
-        codeProperties.put(Integer.valueOf(9), "上传文件错误");
-        codeProperties.put(Integer.valueOf(16), "图片太大");
-        codeProperties.put(Integer.valueOf(17), "获取授权码失败");
-        codeProperties.put(Integer.valueOf(18), "用户登录失败");
-        codeProperties.put(Integer.valueOf(19), "服务器地址错误");
-        codeProperties.put(Integer.valueOf(21), "操作超时错误");
-        codeProperties.put(Integer.valueOf(22), "文件不存在");
-        codeProperties.put(Integer.valueOf(24), "数据不合法");
-        codeProperties.put(Integer.valueOf(25), "json解析异常");
-        codeProperties.put(Integer.valueOf(32), "json格式化异常");
-        codeProperties.put(Integer.valueOf(33), "连接超时");
+        codeProperties.put(0, "操作成功");//但是返回的不一定是成功的
+        codeProperties.put(1, "图片获取异常");
+        codeProperties.put(2, "XML解析异常");
+        codeProperties.put(3, "网络异常");
+        codeProperties.put(4, "记录不存在");
+        codeProperties.put(5, "栏目名称异常");
+        codeProperties.put(6, "获取位置异常");
+        codeProperties.put(8, "保存异常服务问题");
+        codeProperties.put(9, "上传文件错误");
+        codeProperties.put(16, "图片太大");
+        codeProperties.put(17, "获取授权码失败");
+        codeProperties.put(18, "用户登录失败");
+        codeProperties.put(19, "服务器地址错误");
+        codeProperties.put(20, "服务器返回错误");
+        codeProperties.put(21, "操作超时错误");
+        codeProperties.put(22, "文件不存在");
+        codeProperties.put(24, "数据不合法");
+        codeProperties.put(25, "json解析异常");
+        codeProperties.put(32, "json格式化异常");
+        codeProperties.put(33, "连接超时");
     }
 
     public POAException(int paramInt) {
-        this.code = paramInt;
+        code = paramInt;
     }
 
     public POAException(int paramInt, String paramString) {
-        this.errormessage = paramString;
-        this.code = paramInt;
+        errormessage = paramString;
+        code = paramInt;
     }
 
     public POAException(String paramString) {
-        this.errormessage = paramString;
+        errormessage = paramString;
     }
 
     public int getCode() {
@@ -75,9 +75,9 @@ public class POAException extends Exception {
     }
 
     public String getMessage() {
-        if (this.code != 0)
-            return (String) codeProperties.get(Integer.valueOf(this.code));
-        return this.errormessage;
+        if (code != 0)
+            return (String) codeProperties.get(code);
+        return errormessage;
     }
 
 }

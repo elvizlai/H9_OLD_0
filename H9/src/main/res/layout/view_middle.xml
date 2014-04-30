@@ -26,6 +26,17 @@
             android:layout_height="wrap_content"
             android:text="通讯录测试"/>
 
+        <Button
+                android:id="@+id/voice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="语音识别测试"/>
+        <Button
+                android:id="@+id/quit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="退出并关闭后台"/>
+
 
         <RelativeLayout
             android:layout_width="wrap_content"
@@ -87,7 +98,7 @@
         </RelativeLayout>
 
         <Button
-            android:id="@+id/urlSetting"
+            android:id="@+id/netSetting"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="设置"

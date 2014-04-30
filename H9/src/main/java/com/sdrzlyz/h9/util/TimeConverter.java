@@ -24,13 +24,18 @@ public class TimeConverter {
         return formatter.format(date);
     }
 
-    public static Date dateStr2Date(String dateStr) {
+    public static Date DateStr2Date(String dateStr) {
         try {
             return formatter.parse(dateStr);
         } catch (ParseException e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static String Gettime2Str() {
+        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+        return formatter.format(new Date());
     }
 
 

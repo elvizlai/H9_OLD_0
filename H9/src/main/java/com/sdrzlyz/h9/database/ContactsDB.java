@@ -277,8 +277,22 @@ public class ContactsDB {
                 if (result != null) {
                     String organization2Str = uncompressToString(((ReturnContactInfosNew) organization).getContactInfo());
                     String companyContacts2Str = uncompressToString(((ReturnContactInfosNew) companyContacts).getContactInfo());
-                    new Thread(new begin2UpdateOrganize(organization2Str)).start();
-                    new Thread(new begin2UpdateCompanyContacts(companyContacts2Str)).start();
+                    Thread thread1 = new Thread(new begin2UpdateOrganize(organization2Str));
+                    Thread thread2 = new Thread(new begin2UpdateCompanyContacts(companyContacts2Str));
+                    thread1.start();
+                    try {
+                        thread1.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    thread2.start();
+                    try {
+                        thread2.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                   // new Thread(new begin2UpdateCompanyContacts(companyContacts2Str)).start();
                     //contacts_db.close();
                 }
             }
