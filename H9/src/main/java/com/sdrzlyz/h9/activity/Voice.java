@@ -17,7 +17,7 @@ import java.util.Date;
  * Created by huagai on 14-4-30.
  */
 public class Voice extends Activity {
-    private final String appKey = "d5lm3yzkwlb6g36c2f7vzo4bl4t5hahcvtsfcsat";
+    private final String appKey = "5atxn77z3krdz26pkle2btsevsjkzfix6xc4drac";
     private String text = "";
     private TextView show_voice;
 
