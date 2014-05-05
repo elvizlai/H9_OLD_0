@@ -6,7 +6,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.util.JsonReader;
 import android.util.JsonToken;
-import android.util.Log;
 import com.sdrzlyz.h9.config.ApplictionHandle;
 import com.sdrzlyz.h9.entity.MessagesInfo;
 import com.sdrzlyz.h9.entity.ReturnContactInfosNew;
@@ -21,29 +20,23 @@ import java.io.StringReader;
 import java.util.zip.GZIPInputStream;
 
 /**
- * 主要用于联系人数据库写入
- * Created by sdrzlyz on 14-4-18.
- * <p/>
- * 数据库使用方法
- * 1、第一次使用时，应该先创建：ContactsDB.createContactsDB.X
+ * Created by huagai on 14-5-5.
  */
 public class ContactsDB {
-    private static SQLiteDatabase contacts_db;
-
+    private SQLiteDatabase contacts_db;
     private MessagesInfo organization, companyContacts;
 
     private ContactsDB() {
-        contacts_db = ApplictionHandle.getContext().openOrCreateDatabase("hg_contacts", Context.MODE_PRIVATE, null);
-        //createTable();
+        if (contacts_db == null)
+            contacts_db = ApplictionHandle.getContext().openOrCreateDatabase("hg_contacts", Context.MODE_PRIVATE, null);
     }
 
-    /**
-     * 对象无需被引用，建立完后就可以被回收掉
-     *
-     * @return
-     */
-    public static ContactsDB createContactsDB() {
+    public static ContactsDB getInstance() {
         return new ContactsDB();
+    }
+
+    public SQLiteDatabase getContactsDB(){
+        return contacts_db;
     }
 
     private static String uncompressToString(byte[] bytes) {
@@ -54,21 +47,18 @@ public class ContactsDB {
         try {
             GZIPInputStream gzipInputStream = new GZIPInputStream(byteArrayInputStream);
             str = new String(new HttpClient().readStream(gzipInputStream));
-            //System.out.println("解密？" + str);
+            System.out.println("解码：" + str);
         } catch (IOException localIOException) {
             localIOException.printStackTrace();
         }
         return str;
     }
 
-    public SQLiteDatabase getContactsDB() {
-        return contacts_db;
-    }
-
     /**
      * 创建数据库中的表
      */
     public boolean createTable() {
+        //是否成功创建
         boolean isCreatedSucceed = false;
         /**
          * 公司各个机构
@@ -83,7 +73,6 @@ public class ContactsDB {
                 "DepartFlag integer," +
                 "BelongID varchar(32)" +
                 ");";
-
         /**
          * 公司所有联系人
          */
@@ -111,7 +100,6 @@ public class ContactsDB {
                 "IsCollected integer," +
                 "UserOrder varchar(32)" +
                 ");";
-
         /**
          * 客户联系人（有crm权限的才会有这项吧？）
          */
@@ -133,7 +121,6 @@ public class ContactsDB {
                 "NickName varchar(128)," +
                 "Birthday varchar(32)" +
                 ");";
-
         /**
          * 自定义群组？
          */
@@ -145,7 +132,6 @@ public class ContactsDB {
                 "  PINYIN varchar(32)" +
                 ");" +
                 "CREATE INDEX belong_group ON OwnGroups (BelongID, GroupID);";
-
         /**
          * 自定义分组
          */
@@ -159,7 +145,6 @@ public class ContactsDB {
                 "CREATE INDEX belong_group_contact ON OwnContactsGroup (BelongID, GroupID, ContactID);" +
                 "CREATE INDEX group_belong_group ON OwnContactsGroup (BelongID, GroupID);" +
                 "CREATE INDEX belong_contact ON OwnContactsGroup (BelongID, ContactID);";
-
         /**
          * 自定义联系人
          */
@@ -185,7 +170,6 @@ public class ContactsDB {
                 ");" +
                 "CREATE INDEX belong_server ON OwnContacts (BelongID, ServerID);" +
                 "CREATE INDEX belong_id ON OwnContacts (BelongID);";
-
         /**
          * 自定义公共联系人
          */
@@ -210,50 +194,22 @@ public class ContactsDB {
                 "  IsCollected integer," +
                 "  Birthday varchar(32)" +
                 ");";
-
         try {
-            contacts_db.execSQL(create_Organization);
-            contacts_db.execSQL(create_CompanyContacts);
-            contacts_db.execSQL(create_PublicContacts);
-            contacts_db.execSQL(create_CustomContacts);
-            contacts_db.execSQL(create_OwnGroups);
-            contacts_db.execSQL(create_OwnContactsGroup);
-            contacts_db.execSQL(create_OwnContacts);
-            isCreatedSucceed = true;
+            synchronized (this) {
+                contacts_db.execSQL(create_Organization);
+                contacts_db.execSQL(create_CompanyContacts);
+                contacts_db.execSQL(create_PublicContacts);
+                contacts_db.execSQL(create_CustomContacts);
+                contacts_db.execSQL(create_OwnGroups);
+                contacts_db.execSQL(create_OwnContactsGroup);
+                contacts_db.execSQL(create_OwnContacts);
+                isCreatedSucceed = true;
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Log.d("TAG", "TABLE成功创建");
+        System.out.println("TABLE成功创建");
         return isCreatedSucceed;
-    }
-
-    /**
-     * 删除数据库中的表
-     */
-    private boolean deleteTable(String tabName) {
-        boolean isDeletedSucceed = false;
-        if (contacts_db != null) {
-            try {
-                contacts_db.execSQL("DROP TABLE IF EXISTS " + tabName);
-                isDeletedSucceed = true;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return isDeletedSucceed;
-    }
-
-    /**
-     * 将数据库关闭
-     */
-    public void closeContactsDB() {
-        if (contacts_db != null) {
-            contacts_db.close();
-        }
-    }
-
-    public void deleteContactsDB() {
-
     }
 
     public void updateContacts() {
@@ -277,32 +233,43 @@ public class ContactsDB {
                 if (result != null) {
                     String organization2Str = uncompressToString(((ReturnContactInfosNew) organization).getContactInfo());
                     String companyContacts2Str = uncompressToString(((ReturnContactInfosNew) companyContacts).getContactInfo());
-                    Thread thread1 = new Thread(new begin2UpdateOrganize(organization2Str));
-                    Thread thread2 = new Thread(new begin2UpdateCompanyContacts(companyContacts2Str));
-                    thread1.start();
-                    try {
-                        thread1.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    Thread organize_thread = new Thread(new begin2UpdateOrganize(organization2Str));
+                    Thread contacts_thread = new Thread(new begin2UpdateCompanyContacts(companyContacts2Str));
+                    //Thread own_thread =
+                    //Thread xxx_thread =
+                    organize_thread.start();
+//                    try {
+//                        organize_thread.join();
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
 
-                    thread2.start();
-                    try {
-                        thread2.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                   // new Thread(new begin2UpdateCompanyContacts(companyContacts2Str)).start();
-                    //contacts_db.close();
+                    contacts_thread.start();
+//                    try {
+//                        contacts_thread.join();
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
                 }
             }
         }.execute();
-
-
     }
 
-    private void updateDeparts() {
-
+    /**
+     * 删除数据库中的表
+     */
+    private boolean deleteTable(String tableName) {
+        boolean isDeletedSucceed = false;
+        if (contacts_db != null) {
+            try {
+                contacts_db.execSQL("DROP TABLE IF EXISTS " + tableName);
+                isDeletedSucceed = true;
+                System.out.println("TABLE_" + tableName + " 清除成功");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return isDeletedSucceed;
     }
 
     /**
@@ -318,13 +285,12 @@ public class ContactsDB {
         @Override
         public void run() {
             //清空数据库
-            ContactsDB.createContactsDB();
+            //ContactsDB.createContactsDB();
             System.out.println("清除TABLE_Organization");
             if (deleteTable("Organization")) {
-                System.out.println("新建TABLE_Organization");
+                System.out.println("重建TABLE_Organization");
                 createTable();
             }
-
 
             System.out.println("开始更新Organization");
             JsonReader jsonReader = new JsonReader(new StringReader(organization));
@@ -354,7 +320,7 @@ public class ContactsDB {
                                         cv.put(key, value);
                                     }
                                     jsonReader.endObject();
-                                    contacts_db.insert("Organization", null, cv);
+                                    contacts_db.insert("Organization", "", cv);
                                 }
                                 jsonReader.endArray();
                             }
@@ -440,6 +406,4 @@ public class ContactsDB {
             }
         }
     }
-
-
 }

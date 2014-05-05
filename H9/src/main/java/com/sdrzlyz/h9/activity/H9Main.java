@@ -19,6 +19,8 @@ import com.sdrzlyz.h9.R;
 import com.sdrzlyz.h9.adapter.MsgAdapter;
 import com.sdrzlyz.h9.adapter.ViewPagerAdapter;
 import com.sdrzlyz.h9.adapter.WFAdapter;
+import com.sdrzlyz.h9.config.Config;
+import com.sdrzlyz.h9.database.ContactsDB;
 import com.sdrzlyz.h9.entity.CallNew;
 import com.sdrzlyz.h9.entity.WorkFlowList;
 import com.sdrzlyz.h9.service.MainService;
@@ -92,6 +94,17 @@ public class H9Main extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.view_pager);
         Test.LogD("onCreate........");
+
+        //第一次安装的话自动获取一次通讯录
+        if (Config.getInstance().getIsFirstInstall()) {
+            Config.getInstance().setIsFirstInstall(false);
+            //todo
+            if (ContactsDB.getInstance().createTable()) {
+                ContactsDB.getInstance().updateContacts();
+            }else {
+                System.out.println("不需要更新联系人");
+            }
+        }
 
 
         Intent intent = new Intent(H9Main.this, MainService.class);
@@ -192,7 +205,7 @@ public class H9Main extends BaseActivity {
         test.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(H9Main.this, TEST.class);
+                Intent intent = new Intent(H9Main.this, Contacts.class);
                 startActivity(intent);
             }
         });

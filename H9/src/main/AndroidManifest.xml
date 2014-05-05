@@ -41,10 +41,12 @@
         <activity
             android:name=".activity.WFFinish"
             android:windowSoftInputMode="adjustUnspecified|stateHidden"/>
-        <activity android:name=".activity.TEST"/>
+        <activity android:name=".activity.Contacts"/>
         <activity android:name=".activity.TreeActivity"/>
         <activity android:name=".activity.Voice"/>
         <service android:name=".service.MainService"/>
+        <activity android:name=".activity.TEST"/>
+        <activity android:name=".activity.ContactDetail"/>
     </application>
 
 </manifest>

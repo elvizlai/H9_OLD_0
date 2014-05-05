@@ -9,8 +9,6 @@ import android.widget.Button;
 import com.sdrzlyz.h9.R;
 import com.sdrzlyz.h9.database.ContactsDB;
 import com.sdrzlyz.h9.entity.ReturnContactInfosNewEst;
-import com.sdrzlyz.h9.exception.POAException;
-import com.sdrzlyz.h9.impl.LoginService;
 import com.sdrzlyz.h9.net.HttpClient;
 import com.sdrzlyz.h9.tree.Node;
 
@@ -103,13 +101,14 @@ public class TEST extends Activity {
 //        }
         //cursor.close();
 
-        sqLiteDatabase = ContactsDB.createContactsDB().getContactsDB();
+      //  sqLiteDatabase = ContactsDB.createContactsDB().getContactsDB();
 //        ContentValues cv = new ContentValues();
 //        cv.put("parentdepartid", 1);
 //        cv.put("departname", "测试一下");
 //        sqLiteDatabase.insert("Organization", null, cv);
 
-        ContactsDB.createContactsDB().updateContacts();
+       // ContactsDB.createContactsDB().updateContacts();
+        ContactsDB.getInstance().updateContacts();
 
 //        try {
 //            System.out.println("111111111111111:"+LoginService.getLoginService().getServerVison());

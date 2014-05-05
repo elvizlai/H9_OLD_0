@@ -14,7 +14,7 @@ import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombi
 public class PinyinUtil {
 
     /**
-     * 汉字转拼音，遇到数字、字母时爆出原来的形态，只对汉字进行转换  例如：Lai孙-》LaiSUN
+     * 汉字转拼音，遇到数字、字母时爆出原来的形态，只对汉字进行转换  例如：Lai孙-》LAISUN
      *
      * @param chineseStr
      * @return
@@ -32,6 +32,8 @@ public class PinyinUtil {
                 if (temp != null) {
                     pysb.append(temp[0]);
                 } else {
+                    if (c >= 'a' && c <= 'z')
+                        c -= 32;
                     pysb.append(c);
                 }
             }
@@ -42,7 +44,7 @@ public class PinyinUtil {
     }
 
     /**
-     * 只对汉字部分做转换，而且不会转换数字及字母部分   例如：Lai孙-》S
+     * 只对汉字部分做转换，而且不会转换数字及字母部分   例如：LAI孙-》S
      *
      * @param chineseStr
      * @return
@@ -60,6 +62,8 @@ public class PinyinUtil {
                 if (temp != null) {
                     pysb.append(temp[0].charAt(0));
                 } else {
+                    if (c >= 'a' && c <= 'z')
+                        c -= 32;
                     pysb.append(c);
                 }
             }
